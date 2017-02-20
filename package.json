@@ -1,7 +1,7 @@
 {
   "name": "sdic",
-  "version": "1.0.0",
-  "description": "Simple depencency injection container",
+  "version": "1.0.1",
+  "description": "Simple dependency injection container",
   "main": "index.js",
   "scripts": {
     "test": "mocha ./test/**.test.js",
@@ -14,7 +14,8 @@
   "keywords": [
     "di",
     "dependency",
-    "injection"
+    "injection",
+    "container"
   ],
   "author": "Josef Zamrzla",
   "license": "ISC",
