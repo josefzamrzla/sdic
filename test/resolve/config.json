@@ -1,0 +1,8 @@
+{
+	"app": {
+		"version": 1
+	},
+	"users": {
+		"idPrefix": "user-"
+	}
+}

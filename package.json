@@ -1,0 +1,34 @@
+{
+  "name": "sdic",
+  "version": "1.0.0",
+  "description": "Simple depencency injection container",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha ./test/**.test.js",
+    "coverage": "istanbul cover _mocha ./test/**.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/josefzamrzla/sdic.git"
+  },
+  "keywords": [
+    "di",
+    "dependency",
+    "injection"
+  ],
+  "author": "Josef Zamrzla",
+  "license": "ISC",
+  "dependencies": {
+    "fs-readdir-recursive": "^1.0.0",
+    "get-parameter-names": "^0.3.0",
+    "lodash.assignin": "^4.2.0",
+    "lodash.isempty": "^4.4.0",
+    "lodash.isfunction": "^3.0.8",
+    "lodash.isstring": "^4.0.1"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.2.0"
+  }
+}
