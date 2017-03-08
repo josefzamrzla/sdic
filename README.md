@@ -2,8 +2,6 @@
 
 Dependency injection container with auto injection of module dependencies (by parameter names).
 
-Based on the idea of: https://www.npmjs.com/package/adctd
-
 ## Install
 ```bash
 npm install sdic
@@ -259,3 +257,5 @@ We can load the "repositories" folder the same way.
      +- users.js <- as well as this
     ```
  * docs, docs, docs
+ 
+Based on the idea of: https://www.npmjs.com/package/adctd
