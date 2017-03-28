@@ -1,5 +1,7 @@
-const service = (fooService) => ({
-    method: () => fooService.method()
-});
+const service = (fooService) => {
+    return {
+        method: () => fooService.method()
+    }
+};
 
 export default service;

@@ -3,7 +3,7 @@ const _path = require('path');
 const _extend = require('lodash.assignin');
 const _isEmpty = require('lodash.isempty');
 const _isFunction = require('lodash.isfunction');
-const _isObject = require('lodash.isobject');
+const _isPlainObject = require('lodash.isplainobject');
 const _isString = require('lodash.isstring');
 const getParamNames = require('get-parameter-names');
 const readDirR = require('fs-readdir-recursive');
@@ -40,6 +40,45 @@ module.exports = (basepath) => {
 			}
 		};
 
+		let createModuleName = (initialName, relPath, opts = {}) => {
+            let moduleName = initialName;
+			if ('alias' in opts && !(_isString(opts.alias) && /^[a-zA-Z_$]{1}[a-zA-Z0-9_$]+$/.test(opts.alias))) {
+                return throwError(`Invalid alias: ${opts.alias}`);
+            }
+
+            if (opts.alias) {
+                moduleName = opts.alias;
+                delete opts.alias;
+            } else {
+                moduleName = moduleName.replace(/[^a-zA-Z0-9]+(\w)/g, (match, letter) => letter.toUpperCase());
+                let dirname = _path.dirname(relPath).replace(/^([\/]+)(.*)/gi, ((_str, _g1, g2) => g2));
+                if (dirname.length > 1) { // ignores '.', '/', ...
+                    if (opts.reverseName === true) {
+                        moduleName = dirname.split('/').join('/').replace(/[^a-zA-Z0-9]+(\w)/g, (match, letter) => letter.toUpperCase()) + ucfirst(moduleName);
+                    } else {
+                        moduleName = moduleName + ucfirst(dirname.split('/').reverse().join('/').replace(/[^a-zA-Z0-9]+(\w)/g, (match, letter) => letter.toUpperCase()));
+                    }
+                }
+
+                if (opts.prefix) {
+                    moduleName = opts.prefix + ucfirst(moduleName);
+                    //delete opts.prefix;
+                }
+
+                if (opts.postfix) {
+                    moduleName = moduleName + ucfirst(opts.postfix);
+                    //delete opts.postfix;
+                }
+            }
+
+            if (opts.deduplicate === true) {
+                moduleName = moduleName.replace(/([A-Z])/g, (match, letter) => "_" + match).split('_').map(part => ucfirst(part))
+                    .filter((part, index, arr) => arr.indexOf(part) === index).join('');
+            }
+
+            return moduleName.charAt(0).toLowerCase() + moduleName.substr(1);
+		};
+
 		let loadFile = (file, relPath = '', opts = {}) => {
 			if (allowedExtensions && !(allowedExtensions.includes(file.match(/\w+$/)[0]))) return;
 			if (Array.isArray(opts.ignore) && opts.ignore.length) {
@@ -49,49 +88,35 @@ module.exports = (basepath) => {
 			}
 
 			let moduleFile = file.replace(/\.\w+$/, '');
-			let moduleName;
-
-			if ('alias' in opts && !(_isString(opts.alias) && /^[a-zA-Z_$]{1}[a-zA-Z0-9_$]+$/.test(opts.alias))) {
-				return throwError(`Invalid alias: ${opts.alias}`);
-			}
-
-			if (opts.alias) {
-				moduleName = opts.alias;
-				delete opts.alias;
-			} else {
-				// Remove dashes from basename and camelcase result
-				moduleName = _path.basename(moduleFile);
-
-				moduleName = moduleName.replace(/[^a-zA-Z0-9]+(\w)/g, (match, letter) => letter.toUpperCase());
-				let dirname = _path.dirname(relPath).replace(/^([\/]+)(.*)/gi, ((_str, _g1, g2) => g2));
-				if (dirname.length > 1) { // ignores '.', '/', ...
-					if (opts.reverseName === true) {
-						moduleName = dirname.split('/').join('/').replace(/[^a-zA-Z0-9]+(\w)/g, (match, letter) => letter.toUpperCase()) + ucfirst(moduleName);
-					} else {
-						moduleName = moduleName + ucfirst(dirname.split('/').reverse().join('/').replace(/[^a-zA-Z0-9]+(\w)/g, (match, letter) => letter.toUpperCase()));
-					}
-				}
-
-				if (opts.prefix) {
-					moduleName = opts.prefix + ucfirst(moduleName);
-					//delete opts.prefix;
-				}
-
-				if (opts.postfix) {
-					moduleName = moduleName + ucfirst(opts.postfix);
-					//delete opts.postfix;
-				}
-			}
-
-			if (opts.deduplicate === true) {
-				let deduplicated = moduleName.replace(/([A-Z])/g, (match, letter) => "_" + match).split('_').map(part => ucfirst(part))
-					.filter((part, index, arr) => arr.indexOf(part) === index).join('');
-
-				moduleName = deduplicated.charAt(0).toLowerCase() + deduplicated.substr(1);
-			}
+			let moduleName = createModuleName(_path.basename(moduleFile), relPath, opts);
 
 			// Register module
-			container.register(moduleName, require(moduleFile), opts);
+			let module = require(moduleFile);
+			if (_isPlainObject(module)) {
+				let content = fs.readFileSync(file);
+				if (!content) {
+					return throwError(`Cannot load file contents: ${moduleFile}`);
+				}
+
+                content = content.toString();
+                let es6mode = /export (let|const|function|class|default)/m.test(content);
+                if (es6mode) {
+                    // named ES6 exports
+                    Object.keys(module).forEach(key => {
+                        container.register(
+                            key === 'default' ? moduleName : createModuleName(key, relPath, opts),
+                            module[key],
+                            _extend(opts, {dependencies: resolveArguments(module[key])})
+                        );
+                    });
+                } else {
+                    container.register(moduleName, module, opts);
+                }
+
+				content = null;
+			} else {
+                container.register(moduleName, module, opts);
+			}
 		};
 
 		let resolveArguments = (fn) => {
@@ -130,6 +155,14 @@ module.exports = (basepath) => {
 			return true;
 		};
 
+        let makeClassInstance = (constructor, args) => {
+            function F() {
+                return constructor.apply(this, args);
+            }
+            F.prototype = constructor.prototype;
+            return new F();
+        };
+
 		let getModuleInstance = (name, overrides = {}, visited = []) => {
 
 			// check for circular dependencies
@@ -167,10 +200,20 @@ module.exports = (basepath) => {
 				return getModuleInstance(dependency, overrides, JSON.parse(JSON.stringify(visited)));
 			});
 
-			// create instance
+            // create instance
 			let instance;
 			try {
-				instance = factory.fn.apply(factory, args);
+				try {
+					// try to create instance of functional module
+                    instance = factory.fn.apply(factory, args);
+                } catch (err) {
+					if (!/Cannot call a class as a function/.test(err.message)) {
+						throw err;
+					}
+
+					// try to create instance of class module
+                    instance = makeClassInstance(factory.fn, args);
+				}
 			} catch (err) {
 				err.message = `Cannot create an instance of: ${name}. Error: ${err.message}`;
 				return throwError(err);
@@ -202,10 +245,6 @@ module.exports = (basepath) => {
 			},
 
 			register: (name, fn, opts = {}) => {
-				if (_isObject(fn) && 'default' in fn) {
-					fn = fn.default;
-				}
-
 				if (fn === undefined) {
 					return throwError('Unable to register empty (undefined) module');
 				}
@@ -223,7 +262,7 @@ module.exports = (basepath) => {
 				if (_isFunction(fn)) {
 					factories[name] = {
 						fn: fn,
-						dependencies: resolveArguments(fn),
+						dependencies: opts.dependencies ? opts.dependencies : resolveArguments(fn),
 						opts: opts
 					};
 				} else {

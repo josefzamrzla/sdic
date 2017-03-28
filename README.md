@@ -100,7 +100,7 @@ module.exports = (/* no dependencies */) => {
 }
 ```
 
-or using ES6 **export default** syntax (currently only default exports are supported):
+or using ES6 **export default** syntax:
 
 ```javascript
 export default (/* no dependencies */) => {
@@ -125,7 +125,7 @@ module.exports = (myDb, myNextService) => {
 }
 ```
 
-or using ES6 **export default** syntax (currently only default exports are supported):
+or using ES6 **export default** syntax:
 
 ```javascript
 // module depends on myDb and myNextService
@@ -135,6 +135,34 @@ export default (myDb, myNextService) => {
         someMethod: () => {
             return myNextService.doSomething(myDb.getWhatever());
         }
+    }
+}
+```
+
+### Multiple modules definition using ES6 named exports
+```javascript
+// module without dependencies
+export const firstFunctionalService = () => {
+    return {
+        method: () => ({passed: true})
+    }
+};
+
+// module dependds on fooService
+export function secondFunctionalService (fooService) {
+    return {
+        method: () => fooService.method()
+    }
+};
+
+// module dependds on fooService
+export class ClassService {
+    constructor(fooService) {
+        this.fooService = fooService;
+    }
+
+    method() {
+        return this.fooService.method();
     }
 }
 ```
@@ -284,6 +312,10 @@ Finally the modules will be:
  
 We can load the "repositories" folder the same way.
 
+**ES6 note:** when loading named exports into the container, then:
+ * exported name will be taken instead of a filename (with lowercased first letter)
+ * filename will be taken for default (not-named) export
+
 ## TODO
  * load both file and folder with the same name, eg:
     ```text
@@ -291,7 +323,6 @@ We can load the "repositories" folder the same way.
      +- -- foo.js
      +- users.js <- as well as this
     ```
- * add support for ES6 named exports
  * docs, docs, docs
  
 Based on the idea of: https://www.npmjs.com/package/adctd

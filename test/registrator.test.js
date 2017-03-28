@@ -146,20 +146,48 @@ describe('Registrator', () => {
 		expect(container.get('aString')).to.equal('foobar');
 	});
 
-	describe('should be able to register module with "export default" syntax', () => {
-        it('without dependencies', () => {
+	describe('should be able to register es6 modules', () => {
+        it('export default without dependencies', () => {
             container.load('./export-default/dummy-service');
             expect(container.getAll()).to.contain.all.keys(['dummyService']);
             expect(Object.keys(container.getAll()).length).to.eql(2); // 1 + container itself
             expect(container.get('dummyService').method()).to.equal(true);
         });
 
-        it('with dependencies', () => {
+        it('export default with dependencies', () => {
         	container.register('fooService', () => ({method: () => ({passed: true})}));
             container.load('./export-default/service-with-params');
             expect(container.getAll()).to.contain.all.keys(['serviceWithParams', 'fooService']);
             expect(Object.keys(container.getAll()).length).to.eql(3); // 2 + container itself
 			expect(container.get('serviceWithParams').method()).to.deep.equal({passed: true});
+        });
+
+        it('named exports', () => {
+            container.register('fooService', () => ({method: () => ({passed: true})}));
+            container.load('./named-exports', {alias: null});
+
+            expect(container.getAll()).to.contain.all.keys(['firstFunctionalService', 'secondFunctionalService', 'classService', 'services']);
+            expect(Object.keys(container.getAll()).length).to.eql(6); // 5 + container itself
+            expect(container.get('firstFunctionalService').method()).to.deep.equal({passed: true});
+            expect(container.get('secondFunctionalService').method()).to.deep.equal({passed: true});
+            expect(container.get('classService').method()).to.deep.equal({passed: true});
+            expect(container.get('services').method()).to.deep.equal({passed: true}); // default export
+		});
+
+        it('named exports respects opts rules (prefix, postfix, alias)', () => {
+            container.register('fooService', () => ({method: () => ({passed: true})}));
+            container.load('./named-exports', {prefix: 'pre', postfix: 'post'}); // alias == basedir
+
+            expect(container.getAll()).to.contain.all.keys([
+            	'preFirstFunctionalServiceNamedExportsPost',
+            	'preSecondFunctionalServiceNamedExportsPost',
+            	'preClassServiceNamedExportsPost',
+            	'preServicesNamedExportsPost']);
+            expect(Object.keys(container.getAll()).length).to.eql(6); // 5 + container itself
+            expect(container.get('preFirstFunctionalServiceNamedExportsPost').method()).to.deep.equal({passed: true});
+            expect(container.get('preSecondFunctionalServiceNamedExportsPost').method()).to.deep.equal({passed: true});
+            expect(container.get('preClassServiceNamedExportsPost').method()).to.deep.equal({passed: true});
+            expect(container.get('preServicesNamedExportsPost').method()).to.deep.equal({passed: true}); // default export
         });
 	});
 });
