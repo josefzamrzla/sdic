@@ -2,6 +2,8 @@
 
 Dependency injection container with auto injection of module dependencies (by parameter names).
 
+[![Build Status](https://travis-ci.org/josefzamrzla/sdic.svg?branch=master)](https://travis-ci.org/josefzamrzla/sdic)
+
 ## Install
 ```bash
 npm install sdic
