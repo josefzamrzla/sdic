@@ -12,6 +12,13 @@ npm install sdic
 const container = require('sdic').create();
 ```
 
+or
+
+```javascript
+import sdic from 'sdic';
+const container = sdic.create();
+```
+
 ## Container API
 
 ```javascript
@@ -81,7 +88,7 @@ Removes all modules from container.
 
 ## Tutorial
 
-### Module with no dependencies
+### Module definition - a module with no dependencies
 ```javascript
 module.exports = (/* no dependencies */) => {
     // module instance
@@ -91,10 +98,36 @@ module.exports = (/* no dependencies */) => {
 }
 ```
 
-### Module with dependencies
+or using ES6 **export default** syntax (currently only default exports are supported):
+
+```javascript
+export default (/* no dependencies */) => {
+    // module instance
+    return {
+        someMethod: () => {}
+    }
+}
+```
+
+
+### Module definition - a module with some dependencies
 ```javascript
 // module depends on myDb and myNextService
 module.exports = (myDb, myNextService) => {
+    // module instance 
+    return {
+        someMethod: () => {
+            return myNextService.doSomething(myDb.getWhatever());
+        }
+    }
+}
+```
+
+or using ES6 **export default** syntax (currently only default exports are supported):
+
+```javascript
+// module depends on myDb and myNextService
+export default (myDb, myNextService) => {
     // module instance 
     return {
         someMethod: () => {
@@ -251,11 +284,12 @@ We can load the "repositories" folder the same way.
 
 ## TODO
  * load both file and folder with the same name, eg:
-    ```
+    ```text
      +- users/ <- load this
      +- -- foo.js
      +- users.js <- as well as this
     ```
+ * add support for ES6 named exports
  * docs, docs, docs
  
 Based on the idea of: https://www.npmjs.com/package/adctd

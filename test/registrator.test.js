@@ -145,4 +145,21 @@ describe('Registrator', () => {
 		expect(container.get('aNumber')).to.not.equal('123');
 		expect(container.get('aString')).to.equal('foobar');
 	});
+
+	describe('should be able to register module with "export default" syntax', () => {
+        it('without dependencies', () => {
+            container.load('./export-default/dummy-service');
+            expect(container.getAll()).to.contain.all.keys(['dummyService']);
+            expect(Object.keys(container.getAll()).length).to.eql(2); // 1 + container itself
+            expect(container.get('dummyService').method()).to.equal(true);
+        });
+
+        it('with dependencies', () => {
+        	container.register('fooService', () => ({method: () => ({passed: true})}));
+            container.load('./export-default/service-with-params');
+            expect(container.getAll()).to.contain.all.keys(['serviceWithParams', 'fooService']);
+            expect(Object.keys(container.getAll()).length).to.eql(3); // 2 + container itself
+			expect(container.get('serviceWithParams').method()).to.deep.equal({passed: true});
+        });
+	});
 });

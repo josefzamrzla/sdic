@@ -3,6 +3,7 @@ const _path = require('path');
 const _extend = require('lodash.assignin');
 const _isEmpty = require('lodash.isempty');
 const _isFunction = require('lodash.isfunction');
+const _isObject = require('lodash.isobject');
 const _isString = require('lodash.isstring');
 const getParamNames = require('get-parameter-names');
 const readDirR = require('fs-readdir-recursive');
@@ -201,6 +202,10 @@ module.exports = (basepath) => {
 			},
 
 			register: (name, fn, opts = {}) => {
+				if (_isObject(fn) && 'default' in fn) {
+					fn = fn.default;
+				}
+
 				if (fn === undefined) {
 					return throwError('Unable to register empty (undefined) module');
 				}
