@@ -40,6 +40,7 @@ Loads single module file or all module files in given path.
    * prefix - prefix module name
    * postfix - postfix module name
    * deduplicate - remove multiple same string occurences (default: false)
+   * uppercaseFirst - create a module name with uppercased first letter (default: false, module name starts with lowercased letter)
 
 ```javascript
 register(name, fn, opts = {})

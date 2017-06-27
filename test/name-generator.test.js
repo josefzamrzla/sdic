@@ -100,8 +100,8 @@ describe('Module name generator', () => {
 
 		it('should be able to deduplicate name', () => {
 			container.load('./deduplicate/services', {deduplicate: true});
-            expect(container.getAll()).to.contain.all.keys(['userServices']);
-            expect(Object.keys(container.getAll()).length).to.eql(2); // 1 + container itself
+			expect(container.getAll()).to.contain.all.keys(['userServices']);
+			expect(Object.keys(container.getAll()).length).to.eql(2); // 1 + container itself
 		});
 	});
 
@@ -142,11 +142,28 @@ describe('Module name generator', () => {
 			expect(Object.keys(container.getAll()).length).to.eql(5); // 4 + container itself
 		});
 
+		it('should generate correct names with basedir aliases and uppercased first letter', () => {
+			container.load('./lib', {alias: 'my-lib', uppercaseFirst: true});
+			container.load('./services/', {alias: 'MyServices', uppercaseFirst: true});
+			container.load('./services/user', {alias: 'userService', uppercaseFirst: true});
+
+			expect(container.getAll()).to.contain.all.keys(['RolesUserMyServices', 'CommonMyServices', 'RequestValidatorMyLib', 'RolesUserService']);
+			expect(Object.keys(container.getAll()).length).to.eql(5); // 4 + container itself
+		});
+
 		it('should generate correct default names with reverseName option', () => {
 			container.load('./lib', {reverseName: true});
 			container.load('./services/', {reverseName: true});
 
 			expect(container.getAll()).to.contain.all.keys(['servicesUserRoles', 'servicesCommon', 'libRequestValidator']);
+			expect(Object.keys(container.getAll()).length).to.eql(4); // 3 + container itself
+		});
+
+		it('should generate correct default names with reverseName option and uppercased first letter for services', () => {
+			container.load('./lib', {reverseName: true});
+			container.load('./services/', {reverseName: true, uppercaseFirst: true});
+
+			expect(container.getAll()).to.contain.all.keys(['ServicesUserRoles', 'ServicesCommon', 'libRequestValidator']);
 			expect(Object.keys(container.getAll()).length).to.eql(4); // 3 + container itself
 		});
 

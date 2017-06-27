@@ -76,6 +76,10 @@ module.exports = (basepath) => {
                     .filter((part, index, arr) => arr.indexOf(part) === index).join('');
             }
 
+            if (opts.uppercaseFirst === true) {
+                return moduleName.charAt(0).toUpperCase() + moduleName.substr(1);
+            }
+
             return moduleName.charAt(0).toLowerCase() + moduleName.substr(1);
 		};
 
