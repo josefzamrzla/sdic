@@ -1,10 +1,10 @@
-export const FirstFunctionalService = () => {
+export const firstFunctionalService = () => {
     return {
         method: () => ({passed: true})
     }
 };
 
-export function SecondFunctionalService (fooService) {
+export function secondFunctionalService (fooService) {
     return {
         method: () => fooService.method()
     }

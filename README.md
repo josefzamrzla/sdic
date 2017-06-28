@@ -40,7 +40,8 @@ Loads single module file or all module files in given path.
    * prefix - prefix module name
    * postfix - postfix module name
    * deduplicate - remove multiple same string occurences (default: false)
-   * uppercaseFirst - create a module name with uppercased first letter (default: false, module name starts with lowercased letter)
+   * uppercaseFirst - create a module name with uppercased first letter (default: false - module name starts with lowercased letter)
+   * isConstructor - loaded module is a constructor, load and return it as a constructor, do return an instances (default: false - modules as singletons by default)
 
 ```javascript
 register(name, fn, opts = {})
@@ -166,6 +167,25 @@ export class ClassService {
         return this.fooService.method();
     }
 }
+```
+
+**ES6 note:** container returns instances of modules by default (aka singletons). If you want to register a class (constructor function), you have to use option: `isConstructor: true`
+
+```javascript
+class FooBar {}
+container.register('FooBar', FooBar);
+container.get('FooBar'); // --> returns an instance of FooBar (default behaviour)
+```
+
+```javascript
+class FooBar {}
+container.register('FooBar', FooBar, {isConstructor: true});
+container.get('FooBar'); // --> returns class FooBar
+```
+
+```javascript
+// all modules will be loaded as constructors
+container.load('/path/to/constructors_folder', {isConstructor: true});
 ```
 
 ### Manual module registration

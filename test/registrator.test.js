@@ -166,11 +166,11 @@ describe('Registrator', () => {
             container.register('fooService', () => ({method: () => ({passed: true})}));
             container.load('./named-exports', {alias: null});
 
-            expect(container.getAll()).to.contain.all.keys(['firstFunctionalService', 'secondFunctionalService', 'classService', 'services']);
+            expect(container.getAll()).to.contain.all.keys(['firstFunctionalService', 'secondFunctionalService', 'ClassService', 'services']);
             expect(Object.keys(container.getAll()).length).to.eql(6); // 5 + container itself
             expect(container.get('firstFunctionalService').method()).to.deep.equal({passed: true});
             expect(container.get('secondFunctionalService').method()).to.deep.equal({passed: true});
-            expect(container.get('classService').method()).to.deep.equal({passed: true});
+            expect(container.get('ClassService').method()).to.deep.equal({passed: true});
             expect(container.get('services').method()).to.deep.equal({passed: true}); // default export
 		});
 
@@ -189,5 +189,22 @@ describe('Registrator', () => {
             expect(container.get('preClassServiceNamedExportsPost').method()).to.deep.equal({passed: true});
             expect(container.get('preServicesNamedExportsPost').method()).to.deep.equal({passed: true}); // default export
         });
+
+		it('respects isConstructor flag', () => {
+            container.register('fooService', () => ({method: () => ({passed: true})}));
+			container.load('./named-exports/services', {isConstructor: true});
+            const ClassService = container.get('ClassService');
+            const instance = new ClassService();
+            expect(instance).to.be.an.instanceof(ClassService);
+
+            class AnotherClass {
+
+			}
+
+			container.register('AnotherClass', AnotherClass, {isConstructor: true});
+            const AnotherClassPtr = container.get('AnotherClass');
+            const anotherInstance = new AnotherClassPtr();
+            expect(anotherInstance).to.be.an.instanceof(AnotherClass);
+		});
 	});
 });
