@@ -107,7 +107,7 @@ module.exports = (basepath) => {
                 }
 
                 content = content.toString();
-                let es6mode = /export (let|const|function|class|default)/m.test(content);
+                let es6mode = /export[ s\.]{1,2}(let|const|function|class|default)/m.test(content);
                 if (es6mode) {
                     // named ES6 exports
                     Object.keys(module).forEach(key => {
