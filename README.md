@@ -4,6 +4,10 @@ Dependency injection container with auto injection of module dependencies (by pa
 
 [![Build Status](https://travis-ci.org/josefzamrzla/sdic.svg?branch=master)](https://travis-ci.org/josefzamrzla/sdic)
 
+## Prerequisites
+Node.js version >= 6.0
+
+
 ## Install
 ```bash
 npm install sdic
@@ -118,7 +122,7 @@ export default (/* no dependencies */) => {
 ```javascript
 // module depends on myDb and myNextService
 module.exports = (myDb, myNextService) => {
-    // module instance 
+    // module instance
     return {
         someMethod: () => {
             return myNextService.doSomething(myDb.getWhatever());
@@ -132,7 +136,7 @@ or using ES6 **export default** syntax:
 ```javascript
 // module depends on myDb and myNextService
 export default (myDb, myNextService) => {
-    // module instance 
+    // module instance
     return {
         someMethod: () => {
             return myNextService.doSomething(myDb.getWhatever());
@@ -298,8 +302,8 @@ By default, all loaded modules will be named "camelCased, down to up": filename 
  * rolesUsersServices
  * indexUsersRepositories
  * rolesUsersRepositories
- 
-Sounds really strange. Let's set up the loading better. The "services" folder first. It'd be cool to start the name with 
+
+Sounds really strange. Let's set up the loading better. The "services" folder first. It'd be cool to start the name with
 the subfolder (if any), then the filename and the basedir at the end.
 
 ```javascript
@@ -330,7 +334,7 @@ Finally the modules will be:
 
  * userService
  * userRolesService
- 
+
 We can load the "repositories" folder the same way.
 
 **ES6 note:** when loading named exports into the container, then:
@@ -345,5 +349,5 @@ We can load the "repositories" folder the same way.
      +- users.js <- as well as this
     ```
  * docs, docs, docs
- 
+
 Based on the idea of: https://www.npmjs.com/package/adctd
