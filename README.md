@@ -342,7 +342,7 @@ We can load the "repositories" folder the same way.
  * filename will be taken for default (not-named) export
 
 ## Minification
-SDIC supports code minification. Because module dependencies are defined using parameter names, minification would damage them (rename to `a`, `b`, `c`, ... etc.) and container would not be able to load them properly. To prevent this situation all you need to do, is to define the list of module dependencies in a property `dependencies`:
+SDIC supports code minification. Because module dependencies are defined using parameter names, the code minification process would damage them (to `a`, `b`, `c`, ... etc.) and SDIC would not be able to load them properly. To prevent this situation all you need to do, is to define the list of a module dependencies in a property `dependencies`:
 
 ### ES6 modules dependencies
 ```
