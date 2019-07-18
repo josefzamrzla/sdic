@@ -341,6 +341,48 @@ We can load the "repositories" folder the same way.
  * exported name will be taken instead of a filename (with lowercased first letter)
  * filename will be taken for default (not-named) export
 
+## Minification
+SDIC supports code minification. Because module dependencies are defined using parameter names, minification would damage them (rename to `a`, `b`, `c`, ... etc.) and container would not be able to load them properly. To prevent this situation all you need to do, is to define the list of module dependencies in a property `dependencies`:
+
+### ES6 modules dependencies
+```
+const service = (a, b) => { // minified param names
+    return {
+        method: () => a.method() + b.method()
+    };
+};
+service.dependencies = ['fooService', 'barService']; // <--- definition of dependencies
+
+export default service;
+```
+
+### CommonJs modules dependencies
+```
+const service = (a, b) => { // minifies param names
+    return {
+        method: () => a.method() + b.method()
+    };
+};
+service.dependencies = ['fooService', 'barService']; // <--- definition of dependencies
+
+module.exports = service;
+```
+
+### Class dependencies
+```
+export class ClassService {
+    constructor(a, b) { // minified param names
+        this.fooService = a;
+        this.barService = b;
+    }
+
+    method() {
+        return this.fooService.method() + this.barService.method();
+    }
+}
+ClassService.dependencies = ['fooService', 'barService']; // <--- definition of dependencies
+```
+
 ## TODO
  * load both file and folder with the same name, eg:
     ```text
