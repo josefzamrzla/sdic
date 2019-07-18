@@ -1,0 +1,4 @@
+--require @babel/register
+--require test-helpers/chai
+--recursive
+test/**/*.test.js

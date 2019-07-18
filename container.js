@@ -1,10 +1,6 @@
 const fs = require('fs');
 const _path = require('path');
-const _extend = require('lodash.assignin');
-const _isEmpty = require('lodash.isempty');
-const _isFunction = require('lodash.isfunction');
-const _isPlainObject = require('lodash.isplainobject');
-const _isString = require('lodash.isstring');
+const _ = require('lodash');
 const getParamNames = require('get-parameter-names');
 const readDirR = require('fs-readdir-recursive');
 
@@ -42,7 +38,7 @@ module.exports = (basepath) => {
 
     let createModuleName = (initialName, relPath, opts = {}) => {
       let moduleName = initialName;
-      if ('alias' in opts && !(_isString(opts.alias) && /^[a-zA-Z_$]{1}[a-zA-Z0-9_$]+$/.test(opts.alias))) {
+      if ('alias' in opts && !(_.isString(opts.alias) && /^[a-zA-Z_$]{1}[a-zA-Z0-9_$]+$/.test(opts.alias))) {
         return throwError(`Invalid alias: ${opts.alias}`);
       }
 
@@ -100,7 +96,7 @@ module.exports = (basepath) => {
 
       // Register module
       let module = require(moduleFile);
-      if (_isPlainObject(module)) {
+      if (_.isPlainObject(module)) {
         let content = fs.readFileSync(file);
         if (!content) {
           return throwError(`Cannot load file contents: ${moduleFile}`);
@@ -112,9 +108,9 @@ module.exports = (basepath) => {
           // named ES6 exports
           Object.keys(module).forEach(key => {
             container.register(
-              key === 'default' ? moduleName : createModuleName(key, relPath, _extend(opts, {es6: true})),
+              key === 'default' ? moduleName : createModuleName(key, relPath, _.assignIn(opts, {es6: true})),
               module[key],
-              _extend(opts, {dependencies: resolveArguments(module[key])})
+              _.assignIn(opts, {dependencies: resolveArguments(module[key])})
             );
           });
         } else {
@@ -128,6 +124,9 @@ module.exports = (basepath) => {
     };
 
     let resolveArguments = (fn) => {
+      if (_.isArray(fn.dependencies)) {
+        return fn.dependencies;
+      }
       // match argument list
       return getParamNames(fn).filter(String).map((v) => v.trim())
     };
@@ -192,7 +191,7 @@ module.exports = (basepath) => {
         factory.opts.cache = resolveCacheFlag(name);
       }
 
-      let storeInstance = _isEmpty(overrides) && factory.opts.cache;
+      let storeInstance = _.isEmpty(overrides) && factory.opts.cache;
 
       // instance already created - return
       if (factory.instance && storeInstance) {
@@ -267,12 +266,12 @@ module.exports = (basepath) => {
           return throwError(`Module is already registered: ${name}`);
         }
 
-        opts = _extend({cache: null, tags: []}, opts);
+        opts = _.assignIn({cache: null, tags: []}, opts);
         // remove folder opts
         ['recursive', 'reverseName', 'ignore', 'filter'].map(opt => delete opts[opt]);
 
         // store service for later
-        if (_isFunction(fn)) {
+        if (_.isFunction(fn)) {
           factories[name] = {
             fn: fn,
             dependencies: opts.dependencies ? opts.dependencies : resolveArguments(fn),
@@ -289,11 +288,11 @@ module.exports = (basepath) => {
 
       load: (path, opts = {}) => {
 
-        if ('prefix' in opts && !(_isString(opts.prefix) && /^[a-zA-Z_$]{1}[a-zA-Z0-9_$]+$/.test(opts.prefix))) {
+        if ('prefix' in opts && !(_.isString(opts.prefix) && /^[a-zA-Z_$]{1}[a-zA-Z0-9_$]+$/.test(opts.prefix))) {
           throwError(`Invalid prefix: ${opts.prefix}`);
         }
 
-        if ('postfix' in opts && !(_isString(opts.postfix) && /^[a-zA-Z0-9_$]+$/.test(opts.postfix))) {
+        if ('postfix' in opts && !(_.isString(opts.postfix) && /^[a-zA-Z0-9_$]+$/.test(opts.postfix))) {
           throwError(`Invalid postfix: ${opts.postfix}`)
         }
 
@@ -323,7 +322,7 @@ module.exports = (basepath) => {
         // load particular file or directory
         if (fs.statSync(realpath).isDirectory()) {
           if ('alias' in opts) {
-            if (!([null, false, undefined, ''].includes(opts.alias) || (_isString(opts.alias) && /^[a-zA-Z_$]{1}[a-zA-Z0-9_$\-]+$/.test(opts.alias)))) {
+            if (!([null, false, undefined, ''].includes(opts.alias) || (_.isString(opts.alias) && /^[a-zA-Z_$]{1}[a-zA-Z0-9_$\-]+$/.test(opts.alias)))) {
               return throwError(`Invalid alias: ${opts.alias}`);
             }
           }
