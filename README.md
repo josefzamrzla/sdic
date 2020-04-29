@@ -57,6 +57,11 @@ Registers a single module.
  * options - see above
 
 ```javascript
+has(name)
+```
+Checks whether container contains given module by name.
+
+```javascript
 get(name, overrides)
 ```
 Returns registered module from container.
