@@ -5,6 +5,12 @@ describe('Registrator', () => {
 		container = require('./init-container')();
 	});
 
+	it('should return proper boolean value for has()', () => {
+		expect(container.has('app')).to.eql(false);
+		container.register('app', () => {});
+		expect(container.has('app')).to.eql(true);
+	});
+
 	it('should be able to unregister module', () => {
 		container.register('app', () => {});
 		expect(container.getAll()).to.contain.all.keys(['app']);
@@ -33,7 +39,7 @@ describe('Registrator', () => {
 	it('should refuse registering empty (undefined) module', () => {
 		expect(() => container.register('app')).to.throw(Error, /Unable to register empty \(undefined\) module/)
 	});
-	
+
 	it('should refuse to register module multiple times', () => {
 		container.register('app', () => {});
 		expect(() => container.register('app', () => {})).to.throw(Error, /Module is already registered: app/)
@@ -73,7 +79,7 @@ describe('Registrator', () => {
 
 	describe('should respect cache option', () => {
 		it('cache is enabled by default (cache: null or undefined)', () => {
-			
+
 			container.register('cacheA', () => {return {}}, {cache: null});
 			container.register('cacheB', {foo: 'bar'});
 
@@ -91,7 +97,7 @@ describe('Registrator', () => {
 		it('cache is manually enabled by cache option', () => {
 			container.register('cacheA', () => {return {}}, {cache: true});
 			container.register('cacheB', {foo: 'bar'}, {cache: true});
-			
+
 			let cacheA = container.get('cacheA');
 			cacheA.param = 'foo';
 			container.get('cacheA');
@@ -106,7 +112,7 @@ describe('Registrator', () => {
 		it('cache is manually disabled by cache option', () => {
 			container.register('cacheA', () => {return {}}, {cache: false});
 			container.register('cacheB', {foo: 'bar'}, {cache: false});
-			
+
 			let cacheA = container.get('cacheA');
 			cacheA.param = 'foo';
 			container.get('cacheA');

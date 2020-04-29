@@ -24,7 +24,7 @@
   "author": "Josef Zamrzla",
   "license": "ISC",
   "dependencies": {
-    "fs-readdir-recursive": "^1.0.0",
+    "fs-readdir-recursive": "^1.1.0",
     "get-parameter-names": "^0.3.0",
     "lodash": "^4.17.14"
   },

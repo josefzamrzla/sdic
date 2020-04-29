@@ -243,6 +243,8 @@ module.exports = (basepath) => {
     let container = {
       getAll: () => factories,
 
+      has: (name) => !!factories[name],
+
       get: (name, overrides = {}) => getModuleInstance(name, overrides),
 
       getByTag: (tag) => {
