@@ -339,6 +339,13 @@ module.exports = (basepath) => {
           delete factories[name];
         }
 
+        // flush instances with old dependency
+        Object.keys(factories).forEach((key) => {
+          if (factories[key].dependencies.includes(name)) {
+            delete factories[key].instance;
+          }
+        });
+
         container.register(name, fn, opts);
       },
 

@@ -63,6 +63,14 @@ describe('Registrator', () => {
 		expect(container.get('jsonModule')).to.deep.equal({overriden: true});
 	});
 
+	it('should properly use overrriden module', () => {
+		container.register('dependencyModule', () => 'original');
+		container.register('parentModule', (dependencyModule) => dependencyModule);
+		expect(container.get('parentModule')).to.equal('original');
+		container.override('dependencyModule', () => 'overriden');
+		expect(container.get('parentModule')).to.equal('overriden');
+	});
+
 	describe('should be able to handle circular dependencies', () => {
 		it('when resolving cache flag', () => {
 			container.load('./circular', {alias: null});
